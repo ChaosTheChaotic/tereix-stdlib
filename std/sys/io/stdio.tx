@@ -1,0 +1,62 @@
+use "../fs/fileio.tx" as file;
+
+i32 EOF = -1;
+u8 __stdinFd = 0;
+u8 __stdoutFd = 1;
+u8 __stderrFd = 2;
+
+extern {
+	i32 puts(str s);
+}
+
+struct Stream {
+	i32 fd;
+	any handle;
+	Stream new(i32 fd, any handle) {
+		ret self(fd, handle);
+	}
+	size write(self, any data, size bytes) {
+		if (self.handle == null) {
+			ret 0;
+		}
+		ret file.fwrite(data, 1, bytes, self.handle);
+	}
+	size read(self, any dest, size bytes) {
+		if (self.handle == null) {
+			ret 0;
+		}
+		ret file.fread(dest, 1, bytes, self.handle);
+	}
+	bool flush(self) {	
+		if (self.handle == null) {
+			ret false;
+		}
+		ret file.fflush(self.handle) == 0;
+	}
+	void close(&mut self) {
+		if (self.handle != null) {
+			file.fclose(self.handle);
+			self.handle = null;
+			self.fd = -1;
+		}
+	}
+}
+
+Stream STREAM_CLOSED = Stream.new(-1, null);
+
+mut Stream __stdout = STREAM_CLOSED;
+mut Stream __stdin = STREAM_CLOSED;
+
+void __init_stdio() {
+	if (__stdout.handle == null) {
+		mut any handle = file.fdopen(__stdoutFd, "w+");
+		if (handle == null) {
+			handle = file.fdopen(__stdoutFd, "w");
+		}
+		__stdout = Stream.new(__stdoutFd, handle);
+	}
+	if (__stdin.handle == null) {
+		any handle = file.fdopen(__stdinFd, "r");
+		__stdin = Stream.new(__stdinFd, handle);
+	}
+}

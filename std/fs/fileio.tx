@@ -1,0 +1,146 @@
+use "../sys/fs/fileio.tx" as file;
+use "../../core/str" as string;
+use "../../core/mem";
+
+enum FilePerms {
+  FILE_READ = 1 << 0,
+  FILE_WRITE = 1 << 1,
+  FILE_APPEND = 1 << 2,
+  FILE_BIN = 1 << 3,
+  FILE_EXCLUSIVE = 1 << 4,
+
+	u8 from_str(str mode) {
+		 u8 perms = 0;
+
+    if (mode == null || mode[0] == '\0') {
+			ret perms;
+		}
+
+    switch (mode[0]) {
+        case ('r') {
+					perms |= self.FILE_READ;
+					break;
+				}
+        case ('w') {
+					perms |= self.FILE_WRITE;
+					break;
+				}
+        case ('a') {
+					perms |= self.FILE_APPEND;
+					break;
+				}
+        default {
+					ret 0;
+				}
+    }
+
+    for (mut size i = 1; mode[i] != '\0'; i++) {
+        switch (mode[i]) {
+            case ('b') {
+							perms |= self.FILE_BIN;
+							break;
+						}
+            case ('x') {
+							perms |= self.FILE_EXCLUSIVE;
+							break;
+						}
+            case ('+') {
+							perms |= self.FILE_READ | self.FILE_WRITE;
+							break;
+						}
+        }
+    }
+
+    ret perms;
+	}
+}
+
+enum SeekFrom {
+	START = 0,
+	CUR = 1,
+	END = 2,
+}
+
+struct File {
+	any handle;
+	u8 perms;
+	str path;
+	i32 fd;
+
+	File from_path(str path, str mode) {
+		any h = file.fopen(path, mode);
+		if (h == null) {
+			ret File(null, 0, null, -1);
+		}
+		i32 descriptor = file.fileno(h);
+		str path_cpy = string.copy(path);
+		ret File(h, FilePerms.from_str(mode), path_cpy, descriptor);
+	}
+
+	File from_fd(i32 fd, str mode) {
+		any h = file.fdopen(fd, mode);
+		if (h == null) {
+			ret File(null, 0, null, -1);
+		}
+		ret File(h, FilePerms.from_str(mode), null, fd);
+	}
+
+	size write(self, any data, size bytes) {
+		if (self.handle == null) {
+			ret 0;
+		}
+		ret file.fwrite(data, 1, bytes, self.handle);
+	}
+
+	size read(self, any dest, size bytes) {
+		if (self.handle == null) {
+			ret 0;
+		}
+		ret file.fread(dest, 1, bytes, self.handle);
+	}
+
+	bool flush(self) {
+		if (self.handle == null) {
+			ret false;
+		}
+		ret file.fflush(self.handle) == 0;
+	}
+
+	i64 pos(self) {
+		if (self.handle == null) {
+			ret -1;
+		}
+		ret file.ftell(self.handle);
+	}
+
+	i64 seek(self, i64 offset, SeekFrom origin) {
+		if (self.handle == null) {
+			ret -1;
+		}
+		i32 res = file.fseek(self.handle, offset, (i32)origin);
+		if (res != 0) {
+			ret -1;
+		}
+		ret self.pos();
+	}
+
+	bool rewind(File self) {
+		ret self.seek(0, SeekFrom.START) == 0;
+	}
+
+	bool is_open(File self) {
+		ret self.handle != null && self.fd != -1;
+	}
+
+	void close(&mut File self) {
+		if (self.handle != null) {
+			file.fclose(self.handle);
+			self.handle = null;
+			self.fd = -1;
+		}
+		if (self.path != null) {
+			mem.free(self.path);
+			self.path = null;
+		}
+	}
+}

@@ -1,0 +1,185 @@
+use "sys/str" as sys_str;
+use "mem";
+
+// Returns the length of a string, 0 if null
+size strlen(str s) {
+	if (s == null) {
+		ret 0;
+	}
+	ret sys_str.strlen(s);
+}
+
+// Returns a ptr to the location of the start of the substring or null if none found or invalid params
+str find_substr(str large, str sub) {
+	if (large == null || sub == null) {
+		ret null;
+	}
+	ret sys_str.strstr(large, sub);
+}
+
+// Converts a string to lowercase, returning the new allocated string or null upon error, null if string is null
+str lower_alloc(str s) {
+	if (s == null) {
+		ret null;
+	}
+	size len = sys_str.strlen(s);
+	mut str new = mem.try_alloc(len + 1);
+	if (new == null) {
+		ret null;
+	}
+	for (mut size i = 0; i < len; i++) {
+		new[i] = sys_str.tolower(s[i]);
+	}
+	new[len] = '\0';
+	ret new;
+}
+
+// Converts a string to lowercase in place, returning success status or false if string null
+bool lower(mut str s) {
+	if (s == null) {
+		ret false;
+	}
+	for (mut size i = 0; i < sys_str.strlen(s); i++) {
+		s[i] = sys_str.tolower(s[i]);
+	}
+	ret true;
+}
+
+// Converts a string to uppercase, returning the new allocated string or null upon error, null if the string is null
+str upper_alloc(str s) {
+	if (s == null) {
+		ret null;
+	}
+	size len = sys_str.strlen(s);
+	mut str new = mem.try_alloc(len + 1);
+	if (new == null) {
+		ret null;
+	}
+	for (mut size i = 0; i < len; i++) {
+		new[i] = sys_str.toupper(s[i]);
+	}
+	new[len] = '\0';
+	ret new;
+}
+
+// Converts a string to uppercase in place, returning success status and false on string null
+bool upper(mut str s) {
+	if (s == null) {
+		ret false;
+	}
+	for (mut size i = 0; i < sys_str.strlen(s); i++) {
+		s[i] = sys_str.toupper(s[i]);
+	}
+	ret true;
+}
+
+// Returns true if a string is blank (only contains blank characters) and false on string null
+bool is_blank(str s) {
+	if (s == null) {
+		ret false;
+	}
+	for (mut size i = 0; i < sys_str.strlen(s); i++) {
+		if (!sys_str.isspace(s[i])) {
+			ret false;
+		}
+	}
+	ret true;
+}
+
+// Returns true if the string contains only digits and false on string null
+bool is_digit(str s) {
+	if (s == null) {
+		ret false;
+	}
+	for (mut size i = 0; i < sys_str.strlen(s); i++) {
+		if (!sys_str.isdigit(s[i])) {
+			ret false;
+		}
+	}
+	ret true;
+}
+
+// Returns true if the string only contains alphabet characters and false on string being null
+bool is_alpha(str s) {
+	if (s == null) {
+		ret false;
+	}
+	for (mut size i = 0; i < sys_str.strlen(s); i++) {
+		if (!sys_str.isalpha(s[i])) {
+			ret false;
+		}
+	}
+	ret true;
+}
+
+// Returns the substr with all the whitespace leading (or to the left) removed or null if the string is null
+str ltrim(str s) {
+	if (s == null) {
+		ret null;
+	}
+	mut size i = 0;
+	while (sys_str.isspace(s[i])) {
+		i++;
+	}
+	ret s + i;
+}
+
+// Returns the index at which whitespace padding starts (any whitespace to the right) or 0 if the string is null; if the string is blank, 0 is returned
+size rtrim_idx(str s) {
+	if (s == null) {
+		ret 0;
+	}
+	mut size len = sys_str.strlen(s);
+	if (len == 0 || is_blank(s)) {
+		ret 0;
+	}
+	mut size i = len - 1;
+	while (i < len && sys_str.isspace(s[i])) {
+		i--;
+	}
+	ret i + 1;
+}
+
+// Returns an allocated string with all the whitespace padding (to the right of the string) removed or null if an error occurs or the string is null
+str rtrim(str s) {
+	if (s == null) {
+		ret null;
+	}
+	size trimmedLen = rtrim_idx(s);
+	if (trimmedLen == 0 || is_blank(s)) {
+		ret null;
+	}
+	mut str trimmedStr = mem.try_alloc(trimmedLen + 1);
+	if (trimmedStr == null) {
+		ret null;
+	}
+	if (trimmedLen > 0) {
+		mem.copy(trimmedStr, s, trimmedLen);
+	}
+	trimmedStr[trimmedLen] = '\0';
+	ret trimmedStr;
+}
+
+// Returns an allocated copy of the string or null on failure or if the string is null
+str copy(str s) {
+	if (s == null) {
+		ret null;
+	}
+	ret sys_str.strdup(s);
+}
+
+// Returns the number up to an i64 from a string or 0 if the string is null
+i64 to_num(str s) {
+	if (s == null) {
+		ret 0;
+	}
+	ret sys_str.atoll(s);
+}
+
+// Returns the number up to an f64 from a string or 0 if the string is null
+f64 to_float(str s) {
+	if (s == null) {
+		ret 0;
+	}
+	ret sys_str.atof(s);
+}

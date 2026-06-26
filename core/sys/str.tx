@@ -1,0 +1,12 @@
+extern {
+	size strlen(str s);
+	str strstr(str haystack, str needle);
+	i32 tolower(i32 c);
+	i32 toupper(i32 c);
+	i32 isspace(i32 c);
+	i32 isdigit(i32 c);
+	i32 isalpha(i32 c);
+	str strdup(str s);
+	i64 atoll(str nptr);
+	f64 atof(str nptr);
+}

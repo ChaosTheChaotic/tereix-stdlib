@@ -1,0 +1,70 @@
+use "../sys/io/stdio";
+use "../../core/str" as core_str;
+use "../../core/mem";
+
+// Writes the given string to stdout
+void print(str str) {
+	stdio.__init_stdio();
+	stdio.__stdout.write(str, core_str.strlen(str))
+}
+
+// Writes the given string with a newline to stdout returning if it was successful or not
+bool printl(str str) {
+	i32 res = stdio.puts(str);
+	ret res != stdio.EOF;
+}
+
+// Returns an allocated string containing up to the number of bytes requested or null if an error occurs, printing a prompt if not null
+str input_bytes(str prompt, size bytes) {
+	stdio.__init_stdio();
+	mut str line = mem.try_alloc(bytes + 1);
+	if (line == null) {
+		ret null;
+	}
+	if (prompt != null) {
+		print(prompt);
+	}
+	size nread = stdio.__stdin.read(line, bytes);
+	line[nread] = '\0';
+	ret line;
+}
+
+str input(str prompt) {
+	stdio.__init_stdio();
+	mut size cap = 16;
+	mut size idx = 0;
+	mut str line = mem.try_alloc(cap);
+	if (line == null) {
+		ret null;
+	}
+	if (prompt != null) {
+		print(prompt);
+	}
+	mut char ch;
+	mut size nread;
+	while (true) {
+		nread = stdio.__stdin.read(&ch, 1);
+		if (nread == 0) {
+			break;
+		}
+		if (ch == '\n') {
+			break;
+		}
+		if (idx + 1 >= cap) {
+			cap *= 2;
+			str incLine = mem.try_realloc(line, cap);
+			if (incLine == null) {
+				mem.free(line);
+				ret null;
+			}
+			line = incLine;
+		}
+		line[idx++] = ch;
+	}
+	if (idx == 0 && nread == 0) {
+		mem.free(line);
+		ret null;
+	}
+	line[idx] = '\0';
+	ret line;
+}

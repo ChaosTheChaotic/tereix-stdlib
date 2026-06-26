@@ -1,0 +1,111 @@
+use "sys/mem" as mem;
+use "sys/process" as process;
+
+// Allocates a memory block of the given size, returning a pointer or null on failure
+any try_alloc(size size) {
+	if (size <= 0) {
+		ret null;
+	}
+	any p = mem.alloc(size);
+
+	ret p;
+}
+
+// Allocates a memory block of the given size, exiting the process on failure
+any alloc(size size) {
+	any result = try_alloc(size);
+	if (result == null) {
+		process.exit(1);
+	} else {
+		ret result;
+	}
+}
+
+// Allocates zero-initialized memory for an array of n elements of size bytes each,
+// returning null on failure
+any try_zalloc(size n, size size) {
+	if (n <= 0 || size <= 0) {
+		ret null;
+	}
+	any p = mem.calloc(n, size);
+	
+	ret p;
+}
+
+// Allocates zero-initialized memory for an array of n elements of size bytes each,
+// exiting the process on failure
+any zalloc(size n, size size) {
+	any result = try_zalloc(n, size);
+	if (result == null) {
+		process.exit(1);
+	} else {
+		ret result;
+	}
+}
+
+// Reallocates the memory block pointed to by ptr to the given size, returning a pointer
+// or null on failure. Newly allocated memory (if the block grows) is not zero initialized
+any try_realloc(any ptr, size size) {
+	if (ptr == null || size <= 0) {
+		ret null;
+	}
+	any p = mem.realloc(ptr, size);
+
+	ret p;
+}
+
+// Reallocates the memory block pointed to by ptr to the given size, exiting the process
+// on failure. Newly allocated memory (if the block grows) is not zero initialized
+any realloc(any ptr, size size) {
+	any result = try_realloc(ptr, size);
+	if (result == null) {
+		process.exit(1);
+	} else {
+		ret result;
+	}
+}
+
+// Frees the memory pointed to by ptr if ptr is not null
+void free(any ptr) {
+	if (ptr != null) {
+		mem.free(ptr);
+	}
+}
+
+// Returns true if the blocks given are the same
+bool cmp(any b1, any b2, size max_cmp) {
+	if (b1 == null || b2 == null) {
+		ret false;
+	}
+	if (max_cmp == 0) {
+		ret true;
+	}
+	ret mem.memcmp(b1, b2, max_cmp) == 0;
+}
+
+// Copies n bytes from src to dest, returns dest on success, or null if dest is null, or src is null
+any copy(any dest, any src, size n) {
+	if (dest == null || src == null) {
+		ret null;
+	}
+	if (n == 0) {
+		ret dest;
+	}
+	ret mem.memcpy(dest, src, n);
+}
+
+// Returns a pointer to the memory area provided, filling the first n bytes of the memory area with the byte C
+any set(any s, i32 c, size n) {
+	if (s == null || n == 0) {
+		ret s;
+	}
+	ret mem.memset(s, c, n);
+}
+
+// Returns a pointer to dest, copying n bytes from src to dest (memory areas may overlap), internals of this function are provided by libc memmove
+any move(any dest, any src, size n) {
+	if (dest == null || src == null || n == 0) {
+		ret dest;
+	}
+	ret mem.memmove(dest, src, n);
+}

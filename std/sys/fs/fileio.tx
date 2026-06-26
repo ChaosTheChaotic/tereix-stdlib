@@ -1,0 +1,11 @@
+extern {
+	any fdopen(i32 fd, str mode);
+	any fopen(str path, str mode);
+	i64 ftell(any stream); // long can be either i32 or i64 depending
+	i32 fileno(any stream);
+	i32 fputs(str s, any stream);
+	size fwrite(any ptr, size size, size count, any stream);
+	size fread(any ptr, size size, size count, any stream);
+	i32 fflush(any stream);
+	i32 fclose(any stream);
+}
