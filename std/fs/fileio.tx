@@ -1,6 +1,6 @@
-use "../sys/fs/fileio.tx" as file;
-use "../../core/str" as string;
-use "../../core/mem";
+use "std/sys/fs/fileio.tx" as file;
+use "core/str" as string;
+use "core/mem";
 
 enum FilePerms {
   FILE_READ = 1 << 0,

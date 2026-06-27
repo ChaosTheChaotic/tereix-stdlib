@@ -1,6 +1,6 @@
-use "../sys/io/stdio";
-use "../../core/str" as core_str;
-use "../../core/mem";
+use "std/sys/io/stdio";
+use "core/str" as core_str;
+use "core/mem";
 
 // Writes the given string to stdout
 void print(str str) {

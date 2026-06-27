@@ -1,4 +1,4 @@
-use "../fs/fileio.tx" as file;
+use "std/sys/fs/fileio.tx" as file;
 
 i32 EOF = -1;
 u8 __stdinFd = 0;
