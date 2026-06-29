@@ -2,7 +2,7 @@ use "sys/str" as sys_str;
 use "mem";
 
 // Returns the length of a string, 0 if null
-size strlen(str s) {
+usize strlen(str s) {
 	if (s == null) {
 		ret 0;
 	}
@@ -22,12 +22,12 @@ str lower_alloc(str s) {
 	if (s == null) {
 		ret null;
 	}
-	size len = sys_str.strlen(s);
+	usize len = sys_str.strlen(s);
 	mut str new = mem.try_alloc(len + 1);
 	if (new == null) {
 		ret null;
 	}
-	for (mut size i = 0; i < len; i++) {
+	for (mut usize i = 0; i < len; i++) {
 		new[i] = sys_str.tolower(s[i]);
 	}
 	new[len] = '\0';
@@ -39,7 +39,7 @@ bool lower(mut str s) {
 	if (s == null) {
 		ret false;
 	}
-	for (mut size i = 0; i < sys_str.strlen(s); i++) {
+	for (mut usize i = 0; i < sys_str.strlen(s); i++) {
 		s[i] = sys_str.tolower(s[i]);
 	}
 	ret true;
@@ -50,12 +50,12 @@ str upper_alloc(str s) {
 	if (s == null) {
 		ret null;
 	}
-	size len = sys_str.strlen(s);
+	usize len = sys_str.strlen(s);
 	mut str new = mem.try_alloc(len + 1);
 	if (new == null) {
 		ret null;
 	}
-	for (mut size i = 0; i < len; i++) {
+	for (mut usize i = 0; i < len; i++) {
 		new[i] = sys_str.toupper(s[i]);
 	}
 	new[len] = '\0';
@@ -67,7 +67,7 @@ bool upper(mut str s) {
 	if (s == null) {
 		ret false;
 	}
-	for (mut size i = 0; i < sys_str.strlen(s); i++) {
+	for (mut usize i = 0; i < sys_str.strlen(s); i++) {
 		s[i] = sys_str.toupper(s[i]);
 	}
 	ret true;
@@ -78,7 +78,7 @@ bool is_blank(str s) {
 	if (s == null) {
 		ret false;
 	}
-	for (mut size i = 0; i < sys_str.strlen(s); i++) {
+	for (mut usize i = 0; i < sys_str.strlen(s); i++) {
 		if (!sys_str.isspace(s[i])) {
 			ret false;
 		}
@@ -91,7 +91,7 @@ bool is_digit(str s) {
 	if (s == null) {
 		ret false;
 	}
-	for (mut size i = 0; i < sys_str.strlen(s); i++) {
+	for (mut usize i = 0; i < sys_str.strlen(s); i++) {
 		if (!sys_str.isdigit(s[i])) {
 			ret false;
 		}
@@ -104,7 +104,7 @@ bool is_alpha(str s) {
 	if (s == null) {
 		ret false;
 	}
-	for (mut size i = 0; i < sys_str.strlen(s); i++) {
+	for (mut usize i = 0; i < sys_str.strlen(s); i++) {
 		if (!sys_str.isalpha(s[i])) {
 			ret false;
 		}
@@ -117,7 +117,7 @@ str ltrim(str s) {
 	if (s == null) {
 		ret null;
 	}
-	mut size i = 0;
+	mut usize i = 0;
 	while (sys_str.isspace(s[i])) {
 		i++;
 	}
@@ -129,7 +129,7 @@ size rtrim_idx(str s) {
 	if (s == null) {
 		ret 0;
 	}
-	mut size len = sys_str.strlen(s);
+	mut usize len = sys_str.strlen(s);
 	if (len == 0 || is_blank(s)) {
 		ret 0;
 	}
