@@ -1,0 +1,44 @@
+use "mem";
+
+struct Arena {
+	mut *u8 buf;
+	mut size cap;
+	mut size offset;
+
+	any alloc(&mut self, size bytes) {
+		if (bytes == 0) {
+			ret null;
+		}
+
+		mut size align_rem = bytes % 8;
+		mut size aligned_bytes = bytes;
+		if (align_rem != 0) {
+			aligned_bytes = aligned_bytes + 8 - align_rem;
+		}
+		if (self.offset + aligned_bytes > self.cap) {
+			ret null; // OOM
+		}
+
+		any ptr = self.buf + self.offset;
+
+		self.offset += aligned_bytes;
+		ret ptr;
+	}
+
+	void reset(&mut self) {
+		self.offset = 0; // Mark everything as available for writing
+	}
+
+	void destroy(&mut self) {
+		if (self.buf != null) {
+			mem.free(self.buf);
+			self.buf = null;
+			self.cap = 0;
+			self.offset = 0;
+		}
+	}
+
+	self init(size cap) {
+		ret self(mem.alloc(cap), cap, 0);
+	}
+}
