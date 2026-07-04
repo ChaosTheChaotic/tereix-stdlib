@@ -84,7 +84,7 @@ bool cmp(any b1, any b2, size max_cmp) {
 }
 
 // Copies n bytes from src to dest, returns dest on success, or null if dest is null, or src is null
-any copy(any dest, any src, size n) {
+any cpy(any dest, any src, size n) {
 	if (dest == null || src == null) {
 		ret null;
 	}

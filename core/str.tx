@@ -154,14 +154,14 @@ str rtrim(str s) {
 		ret null;
 	}
 	if (trimmedLen > 0) {
-		mem.copy(trimmedStr, s, trimmedLen);
+		mem.cpy(trimmedStr, s, trimmedLen);
 	}
 	trimmedStr[trimmedLen] = '\0';
 	ret trimmedStr;
 }
 
 // Returns an allocated copy of the string or null on failure or if the string is null
-str copy(str s) {
+str cpy(str s) {
 	if (s == null) {
 		ret null;
 	}

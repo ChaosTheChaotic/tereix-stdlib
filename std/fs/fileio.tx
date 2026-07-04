@@ -73,7 +73,7 @@ struct File {
 			ret File(null, 0, null, -1);
 		}
 		i32 descriptor = file.fileno(h);
-		str path_cpy = string.copy(path);
+		str path_cpy = string.cpy(path);
 		ret File(h, FilePerms.from_str(mode), path_cpy, descriptor);
 	}
 
