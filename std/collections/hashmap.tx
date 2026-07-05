@@ -1,0 +1,142 @@
+use "core/mem";
+use "core/hash";
+use "core/str" as string;
+
+struct Entry {
+	str key;
+	any val;
+	u64 hash;
+	*self next;
+}
+
+struct HashMap {
+	**Entry buckets;
+	u64 cap;
+	u64 size;
+	u64 resize_thresh;
+
+	self init() {
+		ret self.init_capacity_resize(16, 75);
+	}
+
+	self init_capacity_resize(u64 cap, u64 resize) {
+		if (resize <= 0 || resize >= 100 || cap <= 0) {
+			ret self(null, 0, 0, 0);
+		}
+		**Entry buckets = mem.zalloc(cap, sizeof(*Entry));
+		ret self(buckets, cap, 0, resize);
+	}
+
+	void deinit(&mut self) {
+		if (self.buckets == null) {
+			ret;
+		}
+		for (mut u64 i = 0; i < self.cap; i++) {
+			mut *Entry curr = self.buckets[i];
+			while (curr != null) {
+				mut *Entry next = curr.next;
+				mem.free(curr.key);
+				mem.free(curr);
+				curr = next;
+			}
+		}
+		mem.free(self.buckets);
+	}
+	void resize(&mut self) {
+		u64 new = self.cap * 2;
+		**mut Entry new_entries = mem.zalloc(new, sizeof(*Entry));
+
+		for (mut u64 i = 0; i < self.cap; i++) {
+			*mut Entry entry = self.buckets[i];
+			while (entry) {
+				*Entry next = entry.next;
+
+				if (entry.key) {
+					u64 hash = hash.rapidhash(entry.key, string.strlen(entry.key));
+					u64 idx = hash % new;
+
+					entry.next = new_entries[idx];
+					new_entries[idx] = entry;
+				}
+
+				entry = next;
+			}
+		}
+		mem.free(self.buckets);
+		self.buckets = new_entries;
+		self.cap = new;
+	}
+	void set(&mut self, str key, any val) {
+		if (!key) {
+			ret;
+		}
+		if ((self.size * 100) >= (self.cap * self.resize_thresh)) {
+			self.resize(self);
+		}
+		
+		usize keylen = string.strlen(key);
+		u64 hash = hash.rapidhash(key, keylen);
+		u64 idx = hash % self.cap;
+
+		*mut Entry entry = self.buckets[idx];
+		while (entry) {
+			if (entry.key && keylen == string.strlen(entry.key) && mem.cmp(entry.key, key, keylen)) {
+				entry.val = val;
+				ret;
+			}
+			entry = entry.next;
+		}
+
+		*mut Entry new_entry = mem.alloc(sizeof(Entry));
+		new_entry.key = string.cpy(key);
+		new_entry.val = val;
+		new_entry.next = self.buckets[idx];
+		self.buckets[idx] = new_entry;
+		self.size++;
+	}
+	any get(self, str key) {
+		if (!key) {
+			ret null;
+		}
+
+		usize keylen = string.strlen(key);
+
+		u64 hash = hash.rapidhash(key, keylen);
+		u64 idx = hash % self.cap;
+
+		*mut Entry entry = self.buckets[idx];
+		while (entry) {
+			if (entry.key && keylen == string.strlen(entry.key) && mem.cmp(entry.key, key, keylen)) {
+				ret entry.val;
+			}
+			entry = entry.next;
+		}
+		ret null; // Not found
+	}
+	void rem(&mut self, str key) {
+		if (key == null || self.size == 0) {
+			ret;
+		}
+
+		usize keylen = string.strlen(key);
+		u64 hash = hash.rapidhash(key, keylen);
+		u64 idx = hash % self.cap;
+
+		*mut Entry entry = self.buckets[idx];
+		*mut Entry prev = null;
+
+		while (entry) {
+			if (entry.key && keylen == string.strlen(entry.key) && mem.cmp(entry.key, key, keylen)) {
+				if (prev) {
+					prev.next = entry.next;
+				} else {
+					self.buckets[idx] = entry.next;
+				}
+				self.size--;
+				ret;
+			}
+			prev = entry;
+			entry = entry.next;
+		}
+	}
+}

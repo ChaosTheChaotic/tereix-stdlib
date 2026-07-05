@@ -74,6 +74,9 @@ void free(any ptr) {
 
 // Returns true if the blocks given are the same
 bool cmp(any b1, any b2, size max_cmp) {
+	if (b1 == b2) {
+		ret true;
+	}
 	if (b1 == null || b2 == null) {
 		ret false;
 	}
