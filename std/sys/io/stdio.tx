@@ -15,19 +15,19 @@ struct Stream {
 	Stream new(i32 fd, any handle) {
 		ret self(fd, handle);
 	}
-	size write(self, any data, size bytes) {
+	size write(&self, any data, size bytes) {
 		if (self.handle == null) {
 			ret 0;
 		}
 		ret file.fwrite(data, 1, bytes, self.handle);
 	}
-	size read(self, any dest, size bytes) {
+	size read(&self, any dest, size bytes) {
 		if (self.handle == null) {
 			ret 0;
 		}
 		ret file.fread(dest, 1, bytes, self.handle);
 	}
-	bool flush(self) {	
+	bool flush(&self) {	
 		if (self.handle == null) {
 			ret false;
 		}

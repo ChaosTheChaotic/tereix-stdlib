@@ -94,7 +94,7 @@ struct HashMap {
 		self.buckets[idx] = new_entry;
 		self.size++;
 	}
-	any get(self, str key) {
+	any get(&self, str key) {
 		if (!key) {
 			ret null;
 		}

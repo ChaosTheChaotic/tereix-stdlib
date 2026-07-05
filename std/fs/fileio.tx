@@ -85,35 +85,35 @@ struct File {
 		ret File(h, FilePerms.from_str(mode), null, fd);
 	}
 
-	size write(self, any data, size bytes) {
+	size write(&self, any data, size bytes) {
 		if (self.handle == null) {
 			ret 0;
 		}
 		ret file.fwrite(data, 1, bytes, self.handle);
 	}
 
-	size read(self, any dest, size bytes) {
+	size read(&self, any dest, size bytes) {
 		if (self.handle == null) {
 			ret 0;
 		}
 		ret file.fread(dest, 1, bytes, self.handle);
 	}
 
-	bool flush(self) {
+	bool flush(&self) {
 		if (self.handle == null) {
 			ret false;
 		}
 		ret file.fflush(self.handle) == 0;
 	}
 
-	i64 pos(self) {
+	i64 pos(&self) {
 		if (self.handle == null) {
 			ret -1;
 		}
 		ret file.ftell(self.handle);
 	}
 
-	i64 seek(self, i64 offset, SeekFrom origin) {
+	i64 seek(&self, i64 offset, SeekFrom origin) {
 		if (self.handle == null) {
 			ret -1;
 		}
@@ -124,7 +124,7 @@ struct File {
 		ret self.pos();
 	}
 
-	bool rewind(File self) {
+	bool rewind(&self) {
 		ret self.seek(0, SeekFrom.START) == 0;
 	}
 
@@ -132,7 +132,7 @@ struct File {
 		ret self.handle != null && self.fd != -1;
 	}
 
-	void close(&mut File self) {
+	void close(&mut self) {
 		if (self.handle != null) {
 			file.fclose(self.handle);
 			self.handle = null;
