@@ -6,7 +6,7 @@ extern {
 	i32 isspace(i32 c);
 	i32 isdigit(i32 c);
 	i32 isalpha(i32 c);
-	str strdup(str s);
+	mut str strdup(str s);
 	i64 atoll(str nptr);
 	f64 atof(str nptr);
 }

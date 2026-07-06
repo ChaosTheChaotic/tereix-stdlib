@@ -1,12 +1,12 @@
 extern {
-	any malloc(size size);
-	any calloc(size n, size size);
-	any realloc(any p, size size);
+	mut any malloc(size size);
+	mut any calloc(size n, size size);
+	mut any realloc(mut any p, size size);
 
 	void free(any p);
 	
-	any memcpy(any dest, any src, size n);
-	any memset(any s, i32 c, size n);
-	any memmove(any dest, any src, size n);
+	mut any memcpy(mut any dest, any src, size n);
+	mut any memset(mut any s, i32 c, size n);
+	mut any memmove(mut any dest, any src, size n);
 	i32 memcmp(any s1, any s2, size n);
 }
