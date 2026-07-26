@@ -6,7 +6,7 @@ any try_alloc(size size) {
 	if (size <= 0) {
 		ret null;
 	}
-	any p = mem.alloc(size);
+	any p = mem.malloc(size);
 
 	ret p;
 }

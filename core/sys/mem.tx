@@ -3,7 +3,7 @@ extern {
 	mut any calloc(size n, size size);
 	mut any realloc(mut any p, size size);
 
-	void free(any p);
+	void free(mut any p);
 	
 	mut any memcpy(mut any dest, any src, size n);
 	mut any memset(mut any s, i32 c, size n);

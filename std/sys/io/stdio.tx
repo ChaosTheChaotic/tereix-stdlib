@@ -21,7 +21,7 @@ struct Stream {
 		}
 		ret file.fwrite(data, 1, bytes, self.handle);
 	}
-	size read(&self, any dest, size bytes) {
+	size read(&self, mut any dest, size bytes) {
 		if (self.handle == null) {
 			ret 0;
 		}

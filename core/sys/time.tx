@@ -1,0 +1,44 @@
+enum CLOCK_ID {
+	CLOCK_REALTIME = 0,
+	CLOCK_MONOTONIC = 1,
+	CLOCK_PROCESS_CPUTIME_ID = 2,
+	CLOCK_THREAD_CPUTIME_ID = 3,
+	CLOCK_MONOTONIC_RAW = 4,
+	CLOCK_REALTIME_COARSE = 5,
+	CLOCK_MONOTONIC_COARSE = 6,
+	CLOCK_BOOTTIME = 7,
+	CLOCK_REALTIME_ALARM = 8,
+	CLOCK_BOOTTIME_ALARM = 9,
+	CLOCK_TAI = 11,
+}
+
+extern {
+	struct timespec {
+		i64 tv_sec;
+		i64 tv_nsec;
+	}
+	struct tm {
+		i32 tm_sec;
+		i32 tm_min;
+		i32 tm_hour;
+		i32 tm_mday;
+		i32 tm_mon;
+		i32 tm_year;
+		i32 tm_wday;
+		i32 tm_yday;
+		i32 tm_isdst;
+
+		i64 tm_gmtoff;
+		str tm_zone;
+	}
+	i32 clock_gettime(i32 clockid, &mut timespec res);
+	i32 clock_getres(i32 clockid, &mut timespec tp);
+	i32 clock_settime(i32 clockid, &timespec tp);
+	i32 clock_nanosleep(i32 clockid, i32 flags, &timespec rqtp, &mut timespec rmtp);
+	i64 mktime(&mut tm tm);
+	&tm gmtime_r(&i64 timep, &mut tm result);
+	&tm localtime_r(&i64 timep, &mut tm result);
+	size strftime(mut str s, size maxsize, str format, &tm timeptr);
+	str strptime(str buf, str format, &mut tm tm);
+	void tzset();
+}

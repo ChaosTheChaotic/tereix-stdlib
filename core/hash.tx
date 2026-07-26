@@ -13,31 +13,32 @@ inline u32 read32(str p) {
 }
 
 u64 rapid_mix(u64 A, u64 B) {
-	mut u64 a_low = A & 0xFFFFFFFF;
-	mut u64 a_high = A >> 32;
-	mut u64 b_low = B & 0xFFFFFFFF;
-	mut u64 b_high = B >> 32;
+	u64 a_low = A & 0xFFFFFFFF;
+	u64 a_high = A >> 32;
+	u64 b_low = B & 0xFFFFFFFF;
+	u64 b_high = B >> 32;
 
-	mut u64 ll = a_low * b_low;
-	mut u64 hl = a_high * b_low;
-	mut u64 lh = a_low * b_high;
-	mut u64 hh = a_high * b_high;
+	u64 ll = a_low * b_low;
+	u64 hl = a_high * b_low;
+	u64 lh = a_low * b_high;
+	u64 hh = a_high * b_high;
 
-	mut u64 cross = ll >> 32 + hl & 0xFFFFFFFF + lh & 0xFFFFFFFF;
-	mut u64 upper = hh + hl >> 32 + lh >> 32 + cross >> 32;
-	mut u64 lower = cross << 32 | ll & 0xFFFFFFFF;
+	u64 cross = (ll >> 32) + (hl & 0xFFFFFFFF) + (lh & 0xFFFFFFFF);
+	u64 upper = hh + hl >> 32 + lh >> 32 + cross >> 32;
+	u64 lower = cross << 32 | ll & 0xFFFFFFFF;
 
 	ret upper ^ lower;
 }
 
+// Hashes a given string, given its length
 u64 rapidhash(str p, size len) {
 	mut u64 seed = 0xb28b3231362eacc9;
 	mut u64 a = 0;
 	mut u64 b = 0;
 
-	mut u64 sec0 = 0x2d358dccaa6c78a5;
-	mut u64 sec1 = 0x8bb84b93962eacc9;
-	mut u64 sec2 = 0x4b33a62ed433d4a3;
+	u64 sec0 = 0x2d358dccaa6c78a5;
+	u64 sec1 = 0x8bb84b93962eacc9;
+	u64 sec2 = 0x4b33a62ed433d4a3;
 
 	seed ^= rapid_mix(seed ^ sec0, sec1) ^ (u64)len;
 

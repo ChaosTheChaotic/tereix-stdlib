@@ -1,0 +1,57 @@
+use "../../core/sys/time";
+
+// The values use match Linux clockid_t constants
+enum ClockId {
+	REALTIME = 0, // System wide real time clock (affected by jumps and changes)
+	MONOTONIC = 1, // Clock that ticks upwards from some point, only affected by NTP rate changes
+	PROCESS_CPUTIME_ID = 2, // Per process CPU time clock (user + system)
+	THREAD_CPUTIME_ID = 3, // Per thread CPU time clock
+	MONOTONIC_RAW = 4, // Monotonic but not affected by NTP rate changes. Uses raw hardware time
+	REALTIME_COARSE = 5, // Faster but less precise version of REALTIME
+	MONOTONIC_COARSE = 6, // Faster but less precise version of MONOTONIC
+	BOOTTIME = 7, // Monotonic time which includes suspend time (identical to monotonic but includes suspend time)
+	REALTIME_ALARM = 8, // REALTIME supporting alarm wakeups (Linux only)
+	BOOTTIME_ALARM = 9, // BOOTTIME supporting alarm wakeups (Linux only)
+	// 10 is left blank purposely to leave out kernel internal CLOCK_TAI
+	TAI = 11, // International atomic time, monotonic, not affected by leap seconds (Linux 3.10+)
+}
+
+struct Time {
+	i64 sec;
+	i64 nsec;
+
+	// Returns current time according to specified clock
+	self now(ClockId clock) {
+		time.timespec ts;
+		time.clock_gettime(clock, &ts);
+		ret self(ts.tv_sec, ts.tv_nsec);
+	}
+
+	// Returns resolution (precision) of specified clock
+	self res(ClockId clock) {
+		time.timespec ts;
+		time.clock_getres(clock, &ts);
+		ret self(ts.tv_sec, ts.tv_nsec);
+	}
+
+	// Sets given clock to time represented by t, returning success status
+	// Note that not all clocks are able to be changed
+	bool set(&self t, ClockId clock) {
+		time.timespec ts;
+		ts.tv_sec = t.sec;
+		ts.tv_nsec = t.nsec;
+		ret time.clock_settime(clock, &ts) == 0;
+	}
+
+	// Sleeps the calling thread for at least the given duration, using the specified clock for time measurent, returning any unslept time as a new instance of Time
+	self sleep(&self dur, ClockId clock) {
+		time.timespec req;
+		time.timespec rem;
+		req.tv_sec = dur.sec;
+		req.tv_nsec = dur.nsec;
+		rem.tv_sec = 0;
+		rem.tv_nsec = 0;
+		time.clock_nanosleep(clock, 0, &req, &rem);
+		ret self(rem.tv_sec, rem.tv_nsec);
+	}
+}

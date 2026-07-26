@@ -5,7 +5,7 @@ use "core/mem";
 // Writes the given string to stdout
 void print(str str) {
 	stdio.__init_stdio();
-	stdio.__stdout.write(str, core_str.strlen(str))
+	stdio.__stdout.write(str, core_str.strlen(str));
 }
 
 // Writes the given string with a newline to stdout returning if it was successful or not
@@ -29,6 +29,7 @@ str input_bytes(str prompt, size bytes) {
 	ret line;
 }
 
+// Returns an allocated string containing a line of input (reads from stdin until \n is found), returning null if an error occurs printing a prompt if not null
 str input(str prompt) {
 	stdio.__init_stdio();
 	mut size cap = 16;

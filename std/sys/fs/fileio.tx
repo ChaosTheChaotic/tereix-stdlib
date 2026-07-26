@@ -5,7 +5,8 @@ extern {
 	i32 fileno(mut any stream);
 	i32 fputs(str s, mut any stream);
 	size fwrite(any ptr, size size, size count, mut any stream);
-	size fread(any ptr, size size, size count, mut any stream);
+	size fread(mut any ptr, size size, size count, mut any stream);
 	i32 fflush(mut any stream);
 	i32 fclose(mut any stream);
+	i32 fseek(mut any stream, i64 offset, i32 whence);
 }

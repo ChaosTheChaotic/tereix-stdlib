@@ -1,0 +1,144 @@
+use "../../core/sys/time" as time_sys;
+use "time";
+use "core/str" as string;
+use "core/mem";
+
+struct DateTime {
+	i32 sec; // Sec (0-60 with possible leap seconds)
+	i32 min; // Min (0-59)
+	i32 hour; // Hour (0-23)
+	i32 mday; // Day of the month (1-indexed)
+	i32 mon; // Month starting at jan
+	i32 year; // Years since 1900
+	i32 wday; // Days of week starting at sunday
+	i32 yday; // Days of year
+	i32 isdst; // Daylight saving time (postitive if yes, 0 if no, negative is unknown)
+	i64 gmtoff; // Offset from UTC in seconds
+	str zone; // Timezone as an allocated string
+
+	self ___from_sys(&time_sys.tm t) {
+		mut str z = null;
+		if (t.tm_zone != null) {
+			z = string.cpy(t.tm_zone);
+		}
+		ret self(t.tm_sec, t.tm_min, t.tm_hour, t.tm_mday, t.tm_mon, t.tm_year, t.tm_wday, t.tm_yday, t.tm_isdst, t.tm_gmtoff, z);
+	}
+
+	time_sys.tm __to_sys(&self) {
+		time_sys.tm t;
+		t.tm_sec = self.sec;
+		t.tm_min = self.min;
+		t.tm_hour = self.hour;
+		t.tm_mday = self.mday;
+		t.tm_mon = self.mon;
+		t.tm_year = self.year;
+		t.tm_wday = self.wday;
+		t.tm_yday = self.yday;
+		t.tm_isdst = self.isdst;
+		t.tm_gmtoff = self.gmtoff;
+		t.tm_zone = self.zone;
+		ret t;
+	}
+
+	// Returns an instance of DateTime representing current UTC time
+	self utc_now() {
+		time.Time t = time.Time.now(time.ClockId.REALTIME);
+		i64 timep = t.sec;
+		time_sys.tm res;
+		time_sys.gmtime_r(&timep, &res);
+		ret self.___from_sys(&res);
+	}
+
+	// Returns an instance of DateTime representing current local time (using tzset to ensure local time zone is used)
+	self local_now() {
+		time_sys.tzset();
+		time.Time t = time.Time.now(time.ClockId.REALTIME);
+		i64 timep = t.sec;
+		time_sys.tm res;
+		time_sys.localtime_r(&timep, &res);
+		ret self.___from_sys(&res);
+	}
+
+	// Returns an instance of DateTime representing UTC time from a UNIX timestamp
+	self from_unix_utc(i64 timestamp) {
+		time_sys.tm res;
+		time_sys.gmtime_r(&timestamp, &res);
+		ret self.__from_sys(&res);
+	}
+
+	// Returns an instance of DateTime representing local time from a UNIX timestamp (using tzset to ensure local time zone is used)
+	self from_unix_local(i64 timestamp) {
+		time_sys.tzset();
+		time_sys.tm res;
+		time_sys.localtime_r(&timestamp, &res);
+		ret self.__from_sys(&res);
+	}
+
+	// Returns an instance of DateTime representing the time given by parsing the given buf using the given fmt string, returning null on faliure
+	// The fmt string uses the same format specifiers as strptime
+	self from_string(str buf, str fmt) {
+		time_sys.tm t;
+		str rem = time_sys.strptime(buf, fmt, &t);
+		if (rem == null) {
+			ret null;
+		}
+		ret self.__from_sys(&t);
+	}
+
+	// Converts DateTime instance to unix timestamp
+	i64 to_unix(&self) {
+		time_sys.tm t = self.__to_sys();
+		ret time_sys.mktime(&t);
+	}
+
+	// Returns an allocated string (or null on failiure) containing the DateTime formatted according to the fmt string, allocating a given maximum number of bytes
+	// The fmt string uses the same specifiers as the strftime C function
+	str format(&self, str fmt, usize max_size) {
+		time_sys.tm t = self.__to_sys();
+		mut str buf = mem.try_alloc(max_size);
+		if (buf == null) {
+			ret null;
+		}
+		size res = time_sys.strftime(buf, max_size, fmt, &t);
+		if (res == 0) {
+			mem.free(buf);
+			ret null;
+		}
+		ret buf;
+	}
+
+	// Parses the input buf given using the fmt given updating the given DateTime instance to match, returning a ptr to the first character in buf not consumed (due to an error) or null on success
+	// The fmt string given uses the fmt specifiers of strptime
+	str parse(&mut self, str buf, str fmt) {
+		time_sys.tm t;
+		str rem = time_sys.strptime(buf, fmt, &t);
+
+		if (rem != null) {
+			self.sec = t.tm_sec;
+			self.min = t.tm_min;
+			self.hour = t.tm_hour;
+			self.mday = t.tm_mday;
+			self.mon = t.tm_mon;
+			self.year = t.tm_year;
+			self.wday = t.tm_wday;
+			self.yday = t.tm_yday;
+			self.isdst = t.tm_isdst;
+			self.gmtoff = t.tm_gmtoff;
+			if (t.tm_zone != null) {
+				if (self.zone != null) {
+					mem.free(self.zone);
+				}
+				self.zone = string.cpy(t.tm_zone);
+			}
+		}
+		ret rem;
+	}
+
+	// Destroys the instance of DateTime
+	void close(&mut self) {
+		if (self.zone != null) {
+			mem.free(self.zone);
+			self.zone = null;
+		}
+	}
+}
