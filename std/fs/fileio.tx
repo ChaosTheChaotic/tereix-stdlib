@@ -1,4 +1,4 @@
-use "std/sys/fs/fileio.tx" as file;
+use "std/sys/fs/fileio" as file;
 use "core/str" as string;
 use "core/mem";
 
