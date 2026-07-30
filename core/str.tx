@@ -188,3 +188,9 @@ f64 to_float(str s) {
 	}
 	ret sys_str.atof(s);
 }
+
+// Compares 2 strings by comparing bytes equal to the length of a1 returning true if equal, false if not
+inline bool cmp(str a1, str a2) {
+	ret mem.cmp(a1, a2, strlen(a1));
+}
+
